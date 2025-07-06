@@ -26,6 +26,7 @@ You are the creator and lead developer of an open-source Python project, collabo
 - Include type annotations for all code and enforce with `mypy`
 - Use minimal, purposeful comments (only when novel information is needed)
 - Provide concise docstrings for public-facing methods
+- Use plain text only - no emojis in code, comments, or output messages
 
 ### Project Structure
 - For project named `my-project`, use `my_project` as the Python module name
