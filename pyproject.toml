@@ -1,0 +1,139 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "prompt-pidgeon"
+version = "0.0.1"
+description = "Sync AI prompts between multiple platforms (Langfuse, Open-WebUI, etc.)"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+    { name = "Matt McNaughton", email = "me@mattjmcnaughton.com" }
+]
+keywords = ["ai", "prompts", "langfuse", "open-webui", "sync"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "typer>=0.12.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "pyyaml>=6.0.1",
+    "structlog>=24.1.0",
+    "langfuse>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "pytest>=8.3.0",
+    "pytest-cov>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mattjmcnaughton/prompt-pidgeon"
+Repository = "https://github.com/mattjmcnaughton/prompt-pidgeon"
+Issues = "https://github.com/mattjmcnaughton/prompt-pidgeon/issues"
+
+[project.scripts]
+prompt-pidgeon = "prompt_pidgeon.cli:main"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+extra_checks = true
+
+[[tool.mypy.overrides]]
+module = [
+    "langfuse.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=prompt_pidgeon",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=80",
+]
+markers = [
+    "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (external dependencies)",
+    "e2e: End-to-end tests (full workflows)",
+]
+
+[tool.coverage.run]
+source = ["prompt_pidgeon"]
+omit = [
+    "tests/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

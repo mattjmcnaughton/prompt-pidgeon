@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+
+# Prompt-Pidgeon Project Specifications
+
+## Project Overview
+- **Name**: `prompt-pidgeon`
+- **Purpose**: Sync AI prompts between multiple platforms (Langfuse, Open-WebUI, etc.)
+- **Stage**: Early-stage project
+- **Deployment**: Runnable as container, CLI, and library
+
+## Core Functionality
+
+### Prompt Management
+- Handle both system prompts and user prompts
+- Focus on most recent version only (no versioning/history)
+- Support manual sync operations (no automated/scheduled syncing)
+
+### Platform Integration
+- **Initial source**: Langfuse
+- **Initial destination**: Open-WebUI
+- Design for extensible platform adapter pattern
+
+### Configuration
+- Use YAML for all configuration management
+- Support platform credentials and sync rules
+- Handle authentication/API keys securely. Auth/API keys will be read via environment variables.
