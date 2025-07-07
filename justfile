@@ -66,3 +66,11 @@ info:
     @echo "Python version: $(cat .python-version)"
     @echo "Dependencies:"
     @uv tree
+
+# Build the Docker image
+build-docker:
+    docker build -t prompt-pidgeon .
+
+# Run the Docker container locally
+run-docker *args:
+    docker run -it --rm prompt-pidgeon {{args}}
