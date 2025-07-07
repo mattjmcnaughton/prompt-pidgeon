@@ -65,4 +65,4 @@ info:
     @echo "Project: prompt-pidgeon"
     @echo "Python version: $(cat .python-version)"
     @echo "Dependencies:"
-    @uv tree 
+    @uv tree
