@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from typing import Any
 
 from langfuse import get_client
 
@@ -15,7 +16,7 @@ def validate_env_vars() -> None:
             sys.exit(1)
 
 
-def connect_to_langfuse():
+def connect_to_langfuse() -> Any:
     """Initialize and test connection to Langfuse."""
     host = os.getenv("LANGFUSE_HOST")
     print("Connecting to Langfuse (project: main, org: homelab)...")
@@ -26,7 +27,7 @@ def connect_to_langfuse():
         # so that we can select our specific project.
         client = get_client()
 
-                # Test the connection by making a simple API call
+        # Test the connection by making a simple API call
         print("Connected successfully")
         return client
 
@@ -42,13 +43,13 @@ def format_timestamp(timestamp: str | None) -> str:
 
     try:
         # Parse ISO format timestamp
-        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+        dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         return dt.strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         return timestamp
 
 
-def list_prompts(client) -> None:
+def list_prompts(client: Any) -> None:
     """Fetch and display all prompts from Langfuse."""
     try:
         print("\nFetching prompts...")
@@ -70,11 +71,11 @@ def list_prompts(client) -> None:
             try:
                 # Will retrieve the `production` version.
                 full_prompt = client.get_prompt(prompt_meta.name)
-                if hasattr(full_prompt, 'prompt') and full_prompt.prompt:
+                if hasattr(full_prompt, "prompt") and full_prompt.prompt:
                     content = str(full_prompt.prompt)[:100]
                     if len(str(full_prompt.prompt)) > 100:
                         content += "..."
-                    print(f"   Content: \"{content}\"")
+                    print(f'   Content: "{content}"')
                 else:
                     print("   Content: No content available")
             except Exception:

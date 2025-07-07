@@ -27,6 +27,7 @@ DEFAULT_MODEL = "anthropic-claude-4-sonnet"
 
 class BaseModelConfig(BaseModel):
     """Configuration for a base model."""
+
     full_name: str
     short_name: str
     is_active: bool = True
@@ -34,12 +35,14 @@ class BaseModelConfig(BaseModel):
 
 class LangfusePrompt(BaseModel):
     """Langfuse prompt data structure."""
+
     name: str
     content: str
 
 
 class SyncConfig(BaseModel):
     """Configuration for sync operation."""
+
     base_models: list[BaseModelConfig]
     langfuse_client: Any
     openwebui_client: httpx.Client
@@ -56,7 +59,7 @@ def validate_env_vars() -> None:
         "LANGFUSE_SECRET_KEY",
         "LANGFUSE_HOST",
         "OPEN_WEBUI_API_KEY",
-        "OPEN_WEBUI_URL"
+        "OPEN_WEBUI_URL",
     ]
 
     for var in required_vars:
@@ -68,10 +71,7 @@ def validate_env_vars() -> None:
 def get_openwebui_auth_headers() -> dict[str, str]:
     """Get authentication headers for Open-WebUI API."""
     api_key = os.getenv("OPEN_WEBUI_API_KEY")
-    return {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
 
 def fetch_langfuse_prompts(client: Any) -> list[LangfusePrompt]:
@@ -90,10 +90,12 @@ def fetch_langfuse_prompts(client: Any) -> list[LangfusePrompt]:
         full_prompt = client.get_prompt(prompt_meta.name)
         assert full_prompt and full_prompt.prompt, f"Could not fetch content for {prompt_meta.name}"
 
-        prompts.append(LangfusePrompt(
-            name=prompt_meta.name,
-            content=str(full_prompt.prompt),
-        ))
+        prompts.append(
+            LangfusePrompt(
+                name=prompt_meta.name,
+                content=str(full_prompt.prompt),
+            )
+        )
 
     print(f"Fetched {len(prompts)} prompts from Langfuse")
     return prompts
@@ -124,7 +126,7 @@ def delete_openwebui_user_prompt(config: SyncConfig, command: str) -> None:
     try:
         response = config.openwebui_client.delete(
             f"{config.openwebui_base_url}/api/v1/prompts/command/{clean_command}/delete",
-            headers=get_openwebui_auth_headers()
+            headers=get_openwebui_auth_headers(),
         )
 
         if response.status_code == 200:
@@ -145,7 +147,7 @@ def delete_openwebui_model(config: SyncConfig, model_id: str) -> None:
         response = config.openwebui_client.delete(
             f"{config.openwebui_base_url}/api/v1/models/model/delete",
             params={"id": model_id},
-            headers=get_openwebui_auth_headers()
+            headers=get_openwebui_auth_headers(),
         )
 
         if response.status_code == 200:
@@ -172,17 +174,10 @@ def create_openwebui_user_prompt(config: SyncConfig, prompt: LangfusePrompt) -> 
     # Delete existing prompt first
     delete_openwebui_user_prompt(config, command)
 
-    prompt_data = {
-        "command": command,
-        "title": title,
-        "content": prompt.content,
-        "access_control": {}
-    }
+    prompt_data = {"command": command, "title": title, "content": prompt.content, "access_control": {}}
 
     response = config.openwebui_client.post(
-        f"{config.openwebui_base_url}/api/v1/prompts/create",
-        json=prompt_data,
-        headers=get_openwebui_auth_headers()
+        f"{config.openwebui_base_url}/api/v1/prompts/create", json=prompt_data, headers=get_openwebui_auth_headers()
     )
 
     # Hard fail on error
@@ -192,12 +187,14 @@ def create_openwebui_user_prompt(config: SyncConfig, prompt: LangfusePrompt) -> 
     print(f"Created user prompt: {result.get('command')} - {result.get('title')}")
 
 
-def create_openwebui_system_model(config: SyncConfig, prompt: LangfusePrompt, base_model_config: BaseModelConfig) -> None:
+def create_openwebui_system_model(
+    config: SyncConfig, prompt: LangfusePrompt, base_model_config: BaseModelConfig
+) -> None:
     """Create a system prompt model in Open-WebUI."""
     print(f"\nSyncing system model: {prompt.name} with base model {base_model_config.full_name}")
 
     # Convert system/prompt-name to model ID and name
-    prompt_base = prompt.name.replace('system/', '').replace('/', '-')
+    prompt_base = prompt.name.replace("system/", "").replace("/", "-")
     model_id = f"{MODEL_PREFIX}-{prompt_base}-{base_model_config.short_name}"
 
     # Delete existing model first
@@ -207,18 +204,14 @@ def create_openwebui_system_model(config: SyncConfig, prompt: LangfusePrompt, ba
         "id": model_id,
         "name": model_id,
         "base_model_id": base_model_config.full_name,
-        "params": {
-            "system": prompt.content
-        },
+        "params": {"system": prompt.content},
         "is_active": base_model_config.is_active,
         "meta": {},
-        "tags": DEFAULT_TAGS
+        "tags": DEFAULT_TAGS,
     }
 
     response = config.openwebui_client.post(
-        f"{config.openwebui_base_url}/api/v1/models/create",
-        json=model_data,
-        headers=get_openwebui_auth_headers()
+        f"{config.openwebui_base_url}/api/v1/models/create", json=model_data, headers=get_openwebui_auth_headers()
     )
 
     # Hard fail on error
@@ -239,7 +232,10 @@ def sync_user_prompts(config: SyncConfig, user_prompts: list[LangfusePrompt]) ->
 def sync_system_prompts(config: SyncConfig, system_prompts: list[LangfusePrompt]) -> None:
     """Sync system prompts to Open-WebUI models."""
     print(f"\n=== Syncing {len(system_prompts)} System Prompts ===")
-    print(f"Creating models with {len(config.base_models)} base models: {[model.full_name for model in config.base_models]}")
+    print(
+        f"""Creating models with {len(config.base_models)} base models: """
+        f"""{[model.full_name for model in config.base_models]}"""
+    )
 
     for prompt in system_prompts:
         for base_model_config in config.base_models:
@@ -249,46 +245,14 @@ def sync_system_prompts(config: SyncConfig, system_prompts: list[LangfusePrompt]
 def get_base_model_configs() -> list[BaseModelConfig]:
     """Get the configured base models."""
     return [
-        BaseModelConfig(
-            full_name=DEFAULT_MODEL,
-            short_name="default",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="google-gemini-2.5-flash",
-            short_name="gemini-fast",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="google-gemini-2.5-pro",
-            short_name="gemini-pro",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="anthropic-claude-4-sonnet",
-            short_name="claude-fast",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="anthropic-claude-4-opus",
-            short_name="claude-pro",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="openai-gpt-4o",
-            short_name="openai-fast",
-            is_active=False
-        ),
-        BaseModelConfig(
-            full_name="openai-gpt-4.5-preview-2025-02-27",
-            short_name="openai-pro",
-            is_active=True
-        ),
-        BaseModelConfig(
-            full_name="mistral-8x7b-instruct",
-            short_name="mistral-fast",
-            is_active=True
-        )
+        BaseModelConfig(full_name=DEFAULT_MODEL, short_name="default", is_active=True),
+        BaseModelConfig(full_name="google-gemini-2.5-flash", short_name="gemini-fast", is_active=True),
+        BaseModelConfig(full_name="google-gemini-2.5-pro", short_name="gemini-pro", is_active=True),
+        BaseModelConfig(full_name="anthropic-claude-4-sonnet", short_name="claude-fast", is_active=True),
+        BaseModelConfig(full_name="anthropic-claude-4-opus", short_name="claude-pro", is_active=True),
+        BaseModelConfig(full_name="openai-gpt-4o", short_name="openai-fast", is_active=False),
+        BaseModelConfig(full_name="openai-gpt-4.5-preview-2025-02-27", short_name="openai-pro", is_active=True),
+        BaseModelConfig(full_name="mistral-8x7b-instruct", short_name="mistral-fast", is_active=True),
     ]
 
 
@@ -306,14 +270,17 @@ def main() -> None:
     # Initialize clients
     print("Initializing clients...")
     langfuse_client = get_client()
-    openwebui_base_url = os.getenv("OPEN_WEBUI_URL").rstrip("/")
+    openwebui_base_url = os.getenv("OPEN_WEBUI_URL")
+    if openwebui_base_url is None:
+        raise ValueError("OPEN_WEBUI_URL environment variable is not set.")
+    openwebui_base_url = openwebui_base_url.rstrip("/")
 
     with httpx.Client(timeout=30.0) as openwebui_client:
         config = SyncConfig(
             base_models=base_models,
             langfuse_client=langfuse_client,
             openwebui_client=openwebui_client,
-            openwebui_base_url=openwebui_base_url
+            openwebui_base_url=openwebui_base_url,
         )
 
         # Fetch all prompts from Langfuse

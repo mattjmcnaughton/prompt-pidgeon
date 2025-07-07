@@ -26,10 +26,7 @@ def validate_env_vars() -> None:
 def get_auth_headers() -> dict[str, str]:
     """Get authentication headers for Open-WebUI API."""
     api_key = os.getenv("OPEN_WEBUI_API_KEY")
-    return {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
 
 def create_user_prompt(client: httpx.Client, base_url: str) -> None:
@@ -43,14 +40,10 @@ def create_user_prompt(client: httpx.Client, base_url: str) -> None:
         "command": f"/{title}",  # MUST have a "/" prefix.
         "title": title,
         "content": "You are a helpful assistant. Please help the user with their question: {{question}}",
-        "access_control": {}
+        "access_control": {},
     }
 
-    response = client.post(
-        f"{base_url}/api/v1/prompts/create",
-        json=prompt_data,
-        headers=get_auth_headers()
-    )
+    response = client.post(f"{base_url}/api/v1/prompts/create", json=prompt_data, headers=get_auth_headers())
 
     result = response.json()
     print(f"User prompt response ({response.status_code}):")
@@ -70,8 +63,7 @@ def delete_user_prompts(client: httpx.Client, base_url: str, commands: list[str]
         clean_command = command.lstrip("/")
 
         response = client.delete(
-            f"{base_url}/api/v1/prompts/command/{clean_command}/delete",
-            headers=get_auth_headers()
+            f"{base_url}/api/v1/prompts/command/{clean_command}/delete", headers=get_auth_headers()
         )
 
         result = response.json()
@@ -88,17 +80,14 @@ def create_system_prompt_model(client: httpx.Client, base_url: str) -> None:
         "name": "test-system-model-v2",
         "base_model_id": "google-gemini-2.5-flash",
         "params": {
-            "system": "You are a coding assistant specialized in Python development. Always provide clear, well-commented code examples and explain your reasoning."
+            "system": """You are a coding assistant specialized in Python development."""
+            """ Always provide clear, well-commented code examples and explain your reasoning."""
         },
         "meta": {},
-        "tags": ["test", "prompt-pidgeon-managed"]
+        "tags": ["test", "prompt-pidgeon-managed"],
     }
 
-    response = client.post(
-        f"{base_url}/api/v1/models/create",
-        json=model_data,
-        headers=get_auth_headers()
-    )
+    response = client.post(f"{base_url}/api/v1/models/create", json=model_data, headers=get_auth_headers())
 
     result = response.json()
     print(f"System prompt model response ({response.status_code}):")
@@ -113,26 +102,20 @@ def test_connection(client: httpx.Client, base_url: str) -> None:
     print("Testing connection to Open-WebUI...")
 
     # Test prompts endpoint
-    response = client.get(
-        f"{base_url}/api/v1/prompts/",
-        headers=get_auth_headers()
-    )
+    response = client.get(f"{base_url}/api/v1/prompts/", headers=get_auth_headers())
 
     print(f"Prompts API response ({response.status_code})")
-    print(f"Raw response: {response.content}")
+    print(f"Raw response: {response.content.decode()}")
     prompts = response.json()
     print(f"Found {len(prompts)} existing prompts")
 
     # Show some details about existing prompts
     for i, prompt in enumerate(prompts[:3]):  # Show first 3
-        print(f"  {i+1}. {prompt.get('command', 'N/A')} - {prompt.get('title', 'N/A')}")
+        print(f"  {i + 1}. {prompt.get('command', 'N/A')} - {prompt.get('title', 'N/A')}")
 
     # Test models endpoint
     print("\nTesting models API...")
-    response = client.get(
-        f"{base_url}/api/v1/models/",
-        headers=get_auth_headers()
-    )
+    response = client.get(f"{base_url}/api/v1/models/", headers=get_auth_headers())
 
     print(f"Models API response ({response.status_code})")
     models = response.json()
@@ -140,7 +123,7 @@ def test_connection(client: httpx.Client, base_url: str) -> None:
 
     # Show some details about existing models
     for i, model in enumerate(models[:3]):  # Show first 3
-        print(f"  {i+1}. {model.get('id', 'N/A')} - {model.get('name', 'N/A')}")
+        print(f"  {i + 1}. {model.get('id', 'N/A')} - {model.get('name', 'N/A')}")
 
 
 def main() -> None:
@@ -152,7 +135,10 @@ def main() -> None:
     validate_env_vars()
 
     # Get configuration
-    base_url = os.getenv("OPEN_WEBUI_URL").rstrip("/")
+    base_url = os.getenv("OPEN_WEBUI_URL")
+    if base_url is None:
+        raise ValueError("OPEN_WEBUI_URL environment variable is not set.")
+    base_url = base_url.rstrip("/")
     print(f"Base URL: {base_url}")
 
     # Create HTTP client

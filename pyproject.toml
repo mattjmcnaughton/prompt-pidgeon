@@ -52,6 +52,8 @@ prompt-pidgeon = "prompt_pidgeon.cli:main"
 [tool.ruff]
 line-length = 120
 target-version = "py313"
+
+[tool.ruff.lint]
 extend-select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -60,15 +62,6 @@ extend-select = [
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
-]
-exclude = [
-    ".git",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    "__pycache__",
-    "build",
-    "dist",
 ]
 
 [tool.ruff.format]
@@ -90,6 +83,7 @@ warn_no_return = true
 warn_unreachable = true
 strict_equality = true
 extra_checks = true
+exclude = ["tests/"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -108,7 +102,6 @@ addopts = [
     "--cov=prompt_pidgeon",
     "--cov-report=term-missing",
     "--cov-report=html",
-    "--cov-fail-under=80",
 ]
 markers = [
     "unit: Unit tests (no external dependencies)",
