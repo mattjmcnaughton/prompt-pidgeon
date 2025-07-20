@@ -1,59 +1,5 @@
 # Project Initialization Plan
 
-## Progress Tracking
-
-**Completion Method**: ✅ = Complete, 🔄 = In Progress, ⏳ = Pending
-
-### Completed Steps
-- ✅ **Step 1** - Update pyproject.toml (Completed: 2024-12-19)
-- ✅ **Step 1.1** - Write a simple proof-of-concept (Completed: 2024-12-19)
-- ✅ **Step 2** - Create Justfile (Completed: 2024-12-19)
-- ✅ **Step 2.1** - Create `pre-commit` (Completed: 2024-12-19)
-- ✅ **Step 2.2** - Create `Dockerfile` for publishing container image (Completed: 2024-12-19)
-
-### Current Status
-- **Phase**: 1 - Project Infrastructure Setup
-- **Next Step**: Step 3 - Configure CI/CD
-- **Currently Working On**: Setting-up GitLab CI
-
-## End State Description
-
-The goal of this plan is to transform the current minimal `prompt-pidgeon` project into a fully-featured, production-ready Python application that adheres to all specified guidelines. The end state will include:
-
-### Project Structure
-- **Module Organization**: `prompt_pidgeon/` as the main Python module (top-level, sibling to `README.md`, `pyproject.toml`)
-- **CLI Application**: Built with `typer` for command-line interface with primary command `prompt-pidgeon sync`
-- **Library Support**: Importable as a Python library
-- **Container Ready**: Dockerized for easy deployment
-
-### Core Functionality
-- **Prompt Management**: Handle system and user prompts with focus on most recent versions only
-- **Platform Integration**: Extensible adapter pattern supporting:
-  - **Sources**: Langfuse
-  - **Sinks**: Filesystem/Git, Open-WebUI, Coding Assistants (Claude Code, Cursor)
-- **Configuration**: `pidgeon.yml` for defining sync jobs with environment variable support for credentials
-- **Tag-Based Filtering**: Support for filtering prompts by tags (e.g., `agentic-coding` for coding assistants)
-- **Manual Sync**: Support for manual sync operations (no automated scheduling)
-
-### Coding Assistant Integration
-- **Claude Code**: Sync to `.md` files in `~/.claude/commands/` (global) or `./.claude/commands/` (project)
-- **Cursor**: Sync to `.mdc` files with YAML frontmatter in `./.cursor/rules/` (project scope)
-- **Planned Platforms**: Gemini CLI and OpenAI Codex (hard-fail with clear error messages in v1)
-- **Scope Handling**: Support for global vs project-specific command placement
-
-### Technical Standards
-- **Code Quality**: Type annotations with `mypy`, formatting with `ruff`, minimal purposeful comments
-- **Testing**: Three-tier testing structure (unit, integration, e2e) using `pytest` with class-based organization
-- **Task Management**: `Justfile` with `lint`, `test`, `typecheck` targets
-- **Logging**: `structlog` with trace IDs and structured logging
-- **Dependencies**: Managed via `uv` with proper version constraints
-
-### Development Infrastructure
-- **Type Checking**: Complete `mypy` configuration with strict settings
-- **Code Formatting**: `ruff` configuration for consistent code style
-- **Testing Framework**: `pytest` with proper test discovery and organization
-- **CI/CD Ready**: All tools configured for continuous integration
-
 ## Step-by-Step Implementation Plan
 
 ### Phase 1: Project Infrastructure Setup
@@ -80,9 +26,9 @@ The goal of this plan is to transform the current minimal `prompt-pidgeon` proje
 - ✅ Use the base python image.
 - ✅ Add Justfile commands.
 
-#### Step 3: Configure CI/CD
-- Set-up github actions for testing, linting, etc... on all MRs.
-- Set-up github actions for publishing images on merge to `main`.
+#### ✅ Step 3: Configure CI/CD
+- ✅ Set-up github actions for testing, linting, etc... on all MRs.
+- ✅ Set-up github actions for publishing images on merge to `main`.
 
 #### Step 4: Create Project Module Structure
 - Create `prompt_pidgeon/` main module directory
