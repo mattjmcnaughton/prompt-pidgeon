@@ -2,7 +2,7 @@
 
 ## Step-by-Step Implementation Plan
 
-### Phase 1: Project Infrastructure Setup
+### ✅ Phase 1: Project Infrastructure Setup
 
 #### ✅ Step 1: Update pyproject.toml
 - ✅ Add complete project metadata and dependencies
@@ -30,10 +30,10 @@
 - ✅ Set-up github actions for testing, linting, etc... on all MRs.
 - ✅ Set-up github actions for publishing images on merge to `main`.
 
-#### Step 4: Create Project Module Structure
-- Create `prompt_pidgeon/` main module directory
-- Set up proper `__init__.py` files
-- Create subdirectories for core components:
+#### ✅ Step 4: Create Project Module Structure
+- ✅ Create `prompt_pidgeon/` main module directory
+- ✅ Set up proper `__init__.py` files
+- ✅ Create subdirectories for core components:
   - `prompt_pidgeon/cli/` - CLI interface
   - `prompt_pidgeon/core/` - Core business logic
   - `prompt_pidgeon/adapters/` - Platform adapters (sources and sinks)
