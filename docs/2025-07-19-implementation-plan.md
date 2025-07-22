@@ -42,7 +42,7 @@
 
 ### Phase 2: Core Data Models and Configuration
 
-#### Step 5: Create Data Models
+#### done: Step 5: Create Data Models
 - Define `Prompt` model using `pydantic` for type safety with metadata support
 - Create platform-specific models for all supported platforms:
   - **Langfuse**: Source prompt models with tag support
