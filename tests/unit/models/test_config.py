@@ -144,7 +144,7 @@ class TestEnvironmentSettings:
             assert settings.langfuse_host is None
             assert settings.open_webui_api_key is None
             assert settings.open_webui_url is None
-            assert settings.config_file == "pidgeon.yml"
+            assert settings.config_file == "prompt-pidgeon.yml"
             assert settings.log_level == "INFO"
             assert settings.dry_run is False
 
@@ -181,7 +181,7 @@ class TestConfigManager:
         """Test creating a config manager."""
         manager = ConfigManager()
 
-        assert manager.config_path == Path("pidgeon.yml")
+        assert manager.config_path == Path("prompt-pidgeon.yml")
         assert isinstance(manager.env_settings, EnvironmentSettings)
 
     def test_config_manager_custom_path(self):

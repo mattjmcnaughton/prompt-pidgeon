@@ -1,4 +1,4 @@
-"""Configuration models for pidgeon.yml and environment variables."""
+"""Configuration models for prompt-pidgeon.yml and environment variables."""
 
 from pathlib import Path
 
@@ -32,7 +32,7 @@ class SyncJobConfig(BaseModel):
 
 
 class PidgeonConfig(BaseModel):
-    """Main configuration model for pidgeon.yml."""
+    """Main configuration model for prompt-pidgeon.yml."""
 
     version: str = Field(default="1", description="Configuration version")
 
@@ -85,7 +85,7 @@ class EnvironmentSettings(BaseSettings):
     open_webui_url: str | None = Field(default=None, description="Open-WebUI base URL")
 
     # Global settings
-    config_file: str = Field(default="pidgeon.yml", description="Path to configuration file")
+    config_file: str = Field(default="prompt-pidgeon.yml", description="Path to configuration file")
     log_level: str = Field(default="INFO", description="Global log level override")
     dry_run: bool = Field(default=False, description="Global dry run mode")
 
@@ -94,7 +94,7 @@ class ConfigManager:
     """Manager for loading and validating configuration."""
 
     def __init__(self, config_path: Path | None = None):
-        self.config_path = config_path or Path("pidgeon.yml")
+        self.config_path = config_path or Path("prompt-pidgeon.yml")
         self.env_settings = EnvironmentSettings()
 
     def load_config(self) -> PidgeonConfig:

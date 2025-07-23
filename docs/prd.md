@@ -17,7 +17,7 @@
 *   **Secondary Use Case (Coding Assistant Integration):** "As a developer, I want to sync my specialized coding prompts tagged with 'agentic-coding' from Langfuse to my coding assistants (Claude Code, Cursor) so I can use them as slash commands like `/create-code-review` directly in my development environment."
 
 ### 4. Core Functionality & Features
-*   **Declarative Sync Configuration:** The core of the tool is a `pidgeon.yml` file where the user defines `sources`, `sinks`, and `sync` jobs. This provides a clear, version-controllable definition of the entire workflow.
+*   **Declarative Sync Configuration:** The core of the tool is a `prompt-pidgeon.yml` file where the user defines `sources`, `sinks`, and `sync` jobs. This provides a clear, version-controllable definition of the entire workflow.
 *   **Simple CLI Interface:** The primary interaction is a single command: `prompt-pidgeon sync`. This command reads the configuration file from the current directory and executes all defined sync operations.
 *   **Pluggable Architecture:** The tool is built around two concepts:
     *   **Sources:** Where prompts originate (e.g., Langfuse, Filesystem).
@@ -28,7 +28,7 @@
 
 ### 5. Technical Considerations
 *   **Tech Stack/Frameworks:** Python, `uvx`, `httpx`, `langfuse`, `Pydantic`, `Typer`.
-*   **Configuration:** `pidgeon.yml` for defining sync jobs. Environment variables for secrets (`LANGFUSE_SECRET_KEY`, etc.).
+*   **Configuration:** `prompt-pidgeon.yml` for defining sync jobs. Environment variables for secrets (`LANGFUSE_SECRET_KEY`, etc.).
 *   **Integrations (v1):**
     *   **Sources:** Langfuse
     *   **Sinks:** Filesystem/Git, Open WebUI, Coding Assistants
@@ -43,5 +43,5 @@
 *   **Roadmap Note (v1.1):** The immediate next priority after launch is to support **bidirectional sync**, specifically enabling Filesystem/Git as a source and Langfuse as a sink. The frontmatter metadata design is the explicit foundation for this feature.
 
 ### 7. Success Criteria
-*   **Functional:** The `prompt-pidgeon sync` command successfully and accurately completes the sync operations defined in the primary use case (e.g., Langfuse -> Filesystem, Langfuse -> Open WebUI, Langfuse -> Coding Assistants) using a `pidgeon.yml` configuration and tag-based filtering.
+*   **Functional:** The `prompt-pidgeon sync` command successfully and accurately completes the sync operations defined in the primary use case (e.g., Langfuse -> Filesystem, Langfuse -> Open WebUI, Langfuse -> Coding Assistants) using a `prompt-pidgeon.yml` configuration and tag-based filtering.
 *   **Coding Assistant Integration:** Tagged prompts from Langfuse successfully sync to Claude Code and Cursor in their respective formats and directory structures, enabling immediate use as slash commands.

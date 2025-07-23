@@ -8,7 +8,7 @@
 
 ## Key Features
 
-*   Configure sync jobs declaratively using a simple `pidgeon.yml` file.
+*   Configure sync jobs declaratively using a simple `prompt-pidgeon.yml` file.
 *   Execute all synchronization tasks with a single `prompt-pidgeon sync` command.
 *   Pluggable architecture supporting various `sources` (like Langfuse) and `sinks` (like Open WebUI or a local filesystem).
 *   Preserve critical metadata and use tags to filter which prompts get synced to specific destinations.
@@ -24,16 +24,16 @@ uv tool install prompt-pidgeon
 2.  Create a configuration file in your project root:
 
 ```
-touch pidgeon.yml
+touch prompt-pidgeon.yml
 ```
 
 3.  Set the required environment variables for your sources and sinks (e.g., `LANGFUSE_SECRET_KEY`).
 
 ## Usage
 
-Define your sources, sinks, and sync jobs in the `pidgeon.yml` file.
+Define your sources, sinks, and sync jobs in the `prompt-pidgeon.yml` file.
 
-**Example `pidgeon.yml`:**
+**Example `prompt-pidgeon.yml`:**
 
 ```
 sources:
