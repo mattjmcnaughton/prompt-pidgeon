@@ -141,19 +141,19 @@ class TestEnvironmentSettings:
 
             assert settings.langfuse_public_key is None
             assert settings.langfuse_secret_key is None
-            assert settings.langfuse_host is None
+            assert settings.langfuse_url is None
             assert settings.open_webui_api_key is None
             assert settings.open_webui_url is None
             assert settings.config_file == "prompt-pidgeon.yml"
             assert settings.log_level == "INFO"
             assert settings.dry_run is False
 
-    def test_environment_settings_from_env(self):
-        """Test environment settings from environment variables."""
+    def test_environment_settings_from_prefixed_env(self):
+        """Test environment settings from prefixed environment variables (preferred)."""
         env_vars = {
             "PROMPT_PIDGEON_LANGFUSE_PUBLIC_KEY": "pk_123",
             "PROMPT_PIDGEON_LANGFUSE_SECRET_KEY": "sk_456",
-            "PROMPT_PIDGEON_LANGFUSE_HOST": "https://cloud.langfuse.com",
+            "PROMPT_PIDGEON_LANGFUSE_URL": "https://cloud.langfuse.com",
             "PROMPT_PIDGEON_OPEN_WEBUI_API_KEY": "owui_789",
             "PROMPT_PIDGEON_OPEN_WEBUI_URL": "https://my-openwebui.com",
             "PROMPT_PIDGEON_CONFIG_FILE": "custom-config.yml",
@@ -166,12 +166,119 @@ class TestEnvironmentSettings:
 
             assert settings.langfuse_public_key == "pk_123"
             assert settings.langfuse_secret_key == "sk_456"
-            assert settings.langfuse_host == "https://cloud.langfuse.com"
+            assert settings.langfuse_url == "https://cloud.langfuse.com"
             assert settings.open_webui_api_key == "owui_789"
             assert settings.open_webui_url == "https://my-openwebui.com"
             assert settings.config_file == "custom-config.yml"
             assert settings.log_level == "DEBUG"
             assert settings.dry_run is True
+
+    def test_environment_settings_from_direct_env(self):
+        """Test environment settings from direct environment variables (fallback)."""
+        env_vars = {
+            "LANGFUSE_PUBLIC_KEY": "pk_direct",
+            "LANGFUSE_SECRET_KEY": "sk_direct",
+            "LANGFUSE_URL": "https://direct.langfuse.com",
+            "OPEN_WEBUI_API_KEY": "owui_direct",
+            "OPEN_WEBUI_URL": "https://direct-openwebui.com",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            settings = EnvironmentSettings()
+
+            assert settings.langfuse_public_key == "pk_direct"
+            assert settings.langfuse_secret_key == "sk_direct"
+            assert settings.langfuse_url == "https://direct.langfuse.com"
+            assert settings.open_webui_api_key == "owui_direct"
+            assert settings.open_webui_url == "https://direct-openwebui.com"
+
+    def test_environment_settings_preference_system(self):
+        """Test that prefixed variables take precedence over direct ones."""
+        env_vars = {
+            # Both prefixed and direct variables set
+            "PROMPT_PIDGEON_LANGFUSE_PUBLIC_KEY": "pk_prefixed",
+            "LANGFUSE_PUBLIC_KEY": "pk_direct",
+            "PROMPT_PIDGEON_LANGFUSE_SECRET_KEY": "sk_prefixed",
+            "LANGFUSE_SECRET_KEY": "sk_direct",
+            "PROMPT_PIDGEON_OPEN_WEBUI_API_KEY": "owui_prefixed",
+            "OPEN_WEBUI_API_KEY": "owui_direct",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            settings = EnvironmentSettings()
+
+            # Prefixed variables should take precedence
+            assert settings.langfuse_public_key == "pk_prefixed"
+            assert settings.langfuse_secret_key == "sk_prefixed"
+            assert settings.open_webui_api_key == "owui_prefixed"
+
+    def test_environment_settings_mixed_variables(self):
+        """Test mixed environment variables (some prefixed, some direct)."""
+        env_vars = {
+            "PROMPT_PIDGEON_LANGFUSE_PUBLIC_KEY": "pk_prefixed",
+            "LANGFUSE_SECRET_KEY": "sk_direct",  # Only direct available
+            "OPEN_WEBUI_API_KEY": "owui_direct",  # Only direct available
+            "PROMPT_PIDGEON_OPEN_WEBUI_URL": "https://prefixed-openwebui.com",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            settings = EnvironmentSettings()
+
+            assert settings.langfuse_public_key == "pk_prefixed"  # Prefixed available
+            assert settings.langfuse_secret_key == "sk_direct"  # Only direct available
+            assert settings.open_webui_api_key == "owui_direct"  # Only direct available
+            assert settings.open_webui_url == "https://prefixed-openwebui.com"  # Prefixed available
+
+    def test_environment_settings_langfuse_host_backward_compatibility(self):
+        """Test backward compatibility with LANGFUSE_HOST variable."""
+        env_vars = {
+            "LANGFUSE_HOST": "https://legacy.langfuse.com",  # Old HOST variable
+            "PROMPT_PIDGEON_LANGFUSE_HOST": "https://legacy-prefixed.langfuse.com",  # Old prefixed HOST
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            settings = EnvironmentSettings()
+
+            # Should fall back to HOST variables when URL not available
+            assert settings.langfuse_url == "https://legacy-prefixed.langfuse.com"  # Prefixed HOST preferred
+
+    def test_environment_settings_url_precedence_over_host(self):
+        """Test that URL variables take precedence over HOST variables."""
+        env_vars = {
+            "LANGFUSE_URL": "https://url.langfuse.com",
+            "LANGFUSE_HOST": "https://host.langfuse.com",
+            "PROMPT_PIDGEON_LANGFUSE_URL": "https://prefixed-url.langfuse.com",
+            "PROMPT_PIDGEON_LANGFUSE_HOST": "https://prefixed-host.langfuse.com",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            settings = EnvironmentSettings()
+
+            # Prefixed URL should take highest precedence
+            assert settings.langfuse_url == "https://prefixed-url.langfuse.com"
+
+    def test_environment_settings_dry_run_boolean_parsing(self):
+        """Test dry_run boolean parsing from environment variables."""
+        test_cases = [
+            ("true", True),
+            ("True", True),
+            ("TRUE", True),
+            ("1", True),
+            ("yes", True),
+            ("on", True),
+            ("false", False),
+            ("False", False),
+            ("0", False),
+            ("no", False),
+            ("off", False),
+            ("invalid", False),
+        ]
+
+        for env_value, expected in test_cases:
+            env_vars = {"PROMPT_PIDGEON_DRY_RUN": env_value}
+            with patch.dict("os.environ", env_vars, clear=True):
+                settings = EnvironmentSettings()
+                assert settings.dry_run == expected, f"Failed for value: {env_value}"
 
 
 class TestConfigManager:

@@ -1,6 +1,8 @@
 """Configuration models for prompt-pidgeon.yml and environment variables."""
 
+import os
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -69,16 +71,19 @@ class PidgeonConfig(BaseModel):
 
 
 class EnvironmentSettings(BaseSettings):
-    """Environment variable settings for prompt-pidgeon."""
+    """Environment variable settings for prompt-pidgeon with preference system.
+
+    Prefers PROMPT_PIDGEON_* variables but falls back to direct names for compatibility.
+    """
 
     model_config = SettingsConfigDict(
-        env_prefix="PROMPT_PIDGEON_", case_sensitive=False, env_file=".env", env_file_encoding="utf-8"
+        case_sensitive=False, env_file=".env", env_file_encoding="utf-8", env_ignore_empty=True
     )
 
     # Langfuse credentials
     langfuse_public_key: str | None = Field(default=None, description="Langfuse public key")
     langfuse_secret_key: str | None = Field(default=None, description="Langfuse secret key")
-    langfuse_host: str | None = Field(default=None, description="Langfuse host URL")
+    langfuse_url: str | None = Field(default=None, description="Langfuse URL")
 
     # Open-WebUI credentials
     open_webui_api_key: str | None = Field(default=None, description="Open-WebUI API key")
@@ -88,6 +93,61 @@ class EnvironmentSettings(BaseSettings):
     config_file: str = Field(default="prompt-pidgeon.yml", description="Path to configuration file")
     log_level: str = Field(default="INFO", description="Global log level override")
     dry_run: bool = Field(default=False, description="Global dry run mode")
+
+    def __init__(self, **kwargs: Any) -> None:
+        # Override any passed values with environment variable preference system
+        env_overrides: dict[str, Any] = {}
+
+        # Langfuse credentials
+        if "langfuse_public_key" not in kwargs:
+            env_overrides["langfuse_public_key"] = os.getenv("PROMPT_PIDGEON_LANGFUSE_PUBLIC_KEY") or os.getenv(
+                "LANGFUSE_PUBLIC_KEY"
+            )
+
+        if "langfuse_secret_key" not in kwargs:
+            env_overrides["langfuse_secret_key"] = os.getenv("PROMPT_PIDGEON_LANGFUSE_SECRET_KEY") or os.getenv(
+                "LANGFUSE_SECRET_KEY"
+            )
+
+        if "langfuse_url" not in kwargs:
+            env_overrides["langfuse_url"] = (
+                os.getenv("PROMPT_PIDGEON_LANGFUSE_URL")
+                or os.getenv("LANGFUSE_URL")
+                or os.getenv("PROMPT_PIDGEON_LANGFUSE_HOST")
+                or os.getenv("LANGFUSE_HOST")
+            )
+
+        # Open-WebUI credentials
+        if "open_webui_api_key" not in kwargs:
+            env_overrides["open_webui_api_key"] = os.getenv("PROMPT_PIDGEON_OPEN_WEBUI_API_KEY") or os.getenv(
+                "OPEN_WEBUI_API_KEY"
+            )
+
+        if "open_webui_url" not in kwargs:
+            env_overrides["open_webui_url"] = os.getenv("PROMPT_PIDGEON_OPEN_WEBUI_URL") or os.getenv("OPEN_WEBUI_URL")
+
+        # Global settings
+        if "config_file" not in kwargs:
+            config_file_env = os.getenv("PROMPT_PIDGEON_CONFIG_FILE")
+            if config_file_env:
+                env_overrides["config_file"] = config_file_env
+
+        if "log_level" not in kwargs:
+            log_level_env = os.getenv("PROMPT_PIDGEON_LOG_LEVEL")
+            if log_level_env:
+                env_overrides["log_level"] = log_level_env
+
+        if "dry_run" not in kwargs:
+            dry_run_env = os.getenv("PROMPT_PIDGEON_DRY_RUN")
+            if dry_run_env:
+                env_overrides["dry_run"] = dry_run_env.lower() in ("true", "1", "yes", "on")
+
+        # Merge environment overrides with passed kwargs
+        final_kwargs = {**env_overrides, **kwargs}
+        # Remove None values to let defaults work
+        final_kwargs = {k: v for k, v in final_kwargs.items() if v is not None}
+
+        super().__init__(**final_kwargs)
 
 
 class ConfigManager:
